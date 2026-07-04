@@ -51,7 +51,7 @@ export function LoginProvider({ children }: { children: React.ReactNode }) {
     );
     handleTimesInscritos(paisSelecionado);
     setEquipes(equipesAtualizadas);
-    setNomeJogador("");
+    setNomeJogador(" ");
   }
 
   function handleNomeJogador(e: React.ChangeEvent<HTMLInputElement>) {
