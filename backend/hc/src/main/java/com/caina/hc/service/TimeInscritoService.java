@@ -1,6 +1,5 @@
 package com.caina.hc.service;
 
-
 import org.springframework.stereotype.Service;
 
 import com.caina.hc.model.TimeInscrito;
@@ -33,6 +32,11 @@ public class TimeInscritoService {
     public TimeInscrito getTimeInscritoById(int timeInscritoId) {
         return timeInscritoRepository.findById(timeInscritoId)
                 .orElseThrow(() -> new RuntimeException());
+    }
+
+    public TimeInscrito getTimeInscritoByNomeJogador(String nomeJogador) {
+        return timeInscritoRepository.findByNomeJogador(nomeJogador)
+        .orElseThrow(() -> new RuntimeException());
     }
 
     public List<TimeInscrito> getTimesInscritos() {

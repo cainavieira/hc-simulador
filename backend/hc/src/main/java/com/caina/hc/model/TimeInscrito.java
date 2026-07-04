@@ -20,9 +20,11 @@ public class TimeInscrito {
     private int id;
 
     @NotEmpty
+    @Column(unique = true)
     private String nomeJogador;
 
     @NotEmpty
+    @Column(unique = true)
     private String timeJogador;
 
     @NotEmpty
