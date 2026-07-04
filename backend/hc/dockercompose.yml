@@ -1,0 +1,20 @@
+services:
+  db-hc-postgres:
+    image: postgres:17.10-alpine
+    environment:
+      - POSTGRES_DB=app-hc
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=8462
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d app-hc"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  web-hc:
+    build: .
+    ports:
+      - "7000:7000"
+    depends_on:
+      - db-hc-postgres
