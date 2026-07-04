@@ -3,7 +3,7 @@ import hclogo from "../assets/image.png";
 
 
 export default function Login() {
-  const { handleSelecionado, handleSubmit, handleNomeJogador, equipes, loading, timesInscritos } =
+  const { handleSelecionado, handleSubmit, handleNomeJogador, equipes, loading, timesInscritos, nomeJogador, paisSelecionado } =
     useLogin();
 
   if (loading)
@@ -25,6 +25,7 @@ export default function Login() {
         <input
           type="text"
           id="nome"
+          value={nomeJogador}
           onChange={handleNomeJogador}
           className="ring-border ring-1 rounded-md font-semibold  text-center p-2! text-xl"
         />
@@ -36,10 +37,11 @@ export default function Login() {
         <select
           name="time"
           id="time-name"
+          value={paisSelecionado?.pais ?? ""}
           onChange={handleSelecionado}
           className="ring-border ring-1 rounded-md font-semibold text-center p-2! text-xl"
         >
-          <option className="ring-border">Escolha um time...</option>
+          <option value="" className="ring-border">Escolha um time...</option>
           {equipes &&
             equipes.map((item) => (
               <option key={item.id} value={item.pais}>
@@ -55,12 +57,6 @@ export default function Login() {
         >
           Clica para Salvar
         </button>
-      </div>
-      <div>
-        <p className=" mb-2 text-3xl! text-border">
-          {timesInscritos &&
-            timesInscritos.map((t) => `Nome: ${t.nomeJogador}\nPais: ${t.timeJogador}\n\n`)}
-        </p>
       </div>
     </form>
   );

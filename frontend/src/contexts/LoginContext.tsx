@@ -11,6 +11,8 @@ type LoginContextType = {
   handleNomeJogador: (e: React.ChangeEvent<HTMLInputElement>) => void;
   loading: boolean;
   timesInscritos: TimesInscritos[];
+  nomeJogador: string;
+  paisSelecionado: Equipe | null;
 };
 
 const LoginContext = createContext<LoginContextType | null>(null);
@@ -51,7 +53,8 @@ export function LoginProvider({ children }: { children: React.ReactNode }) {
     );
     handleTimesInscritos(paisSelecionado);
     setEquipes(equipesAtualizadas);
-    setNomeJogador(" ");
+    setNomeJogador("");
+    setPaisSelecionado(null);
   }
 
   function handleNomeJogador(e: React.ChangeEvent<HTMLInputElement>) {
@@ -82,6 +85,8 @@ export function LoginProvider({ children }: { children: React.ReactNode }) {
         handleNomeJogador,
         timesInscritos,
         loading,
+        nomeJogador,
+        paisSelecionado,
       }}
     >
       {children}
