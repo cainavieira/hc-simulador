@@ -1,38 +1,41 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import { timesMock } from "../data/timesMock";
 import type { Equipe } from "../data/timesMock";
-
-type TimeInscrito = {
-  nome: string;
-  pais: string;
-  bandeira: string;
-  id: string;
-};
+import { sendTimeInscrito, getTimesInscritos } from "../services/useTimes";
+import type { TimesInscritos } from "../services/useTimes";
 
 type LoginContextType = {
-  timesInscritos: TimeInscrito[];
   equipes: Equipe[];
   handleSelecionado: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   handleSubmit: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   handleNomeJogador: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  loading: boolean;
+  timesInscritos: TimesInscritos[];
 };
 
 const LoginContext = createContext<LoginContextType | null>(null);
 
 export function LoginProvider({ children }: { children: React.ReactNode }) {
+  const [timesInscritos, setTimesInscritos] = useState<TimesInscritos[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [equipes, setEquipes] = useState<Equipe[]>(timesMock);
   const [paisSelecionado, setPaisSelecionado] = useState<Equipe | null>(null);
   const [nomeJogador, setNomeJogador] = useState<string>("");
-  const [timesInscritos, setTimesInscritos] = useState<TimeInscrito[]>([]);
 
-  function handleTimesInscritos(paisSelecionado: Equipe) {
+
+  async function handleTimesInscritos(paisSelecionado: Equipe) {
     const inscrito = {
-      id: crypto.randomUUID(),
-      nome: nomeJogador,
-      pais: paisSelecionado.pais,
-      bandeira: `https://flagsapi.com/${paisSelecionado.codigo}/flat/64.png`,
+      nomeJogador: nomeJogador,
+      timeJogador: paisSelecionado.pais,
+      codigoPais: paisSelecionado.codigo
     };
-    setTimesInscritos([...timesInscritos, inscrito]);
+    try {
+      await sendTimeInscrito(inscrito);
+      const dados = await getTimesInscritos();
+      setTimesInscritos(dados);
+    } catch (error) {
+      console.error("Erro ao enviar o time inscrito:", error);
+    }
   }
   function handleSelecionado(e: React.ChangeEvent<HTMLSelectElement>) {
     const pais = e.currentTarget.value;
@@ -55,14 +58,30 @@ export function LoginProvider({ children }: { children: React.ReactNode }) {
     setNomeJogador(e.currentTarget.value);
   }
 
+  useEffect(() => {
+    async function handleGetTimesInscritos() {
+      try {
+        const dadosTimesInscritos = await getTimesInscritos();
+        setTimesInscritos(dadosTimesInscritos);
+      } catch (error) {
+        console.error("Erro ao buscar os times inscritos:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    handleGetTimesInscritos();
+  }, []);
+
+
   return (
     <LoginContext.Provider
       value={{
-        timesInscritos: timesInscritos,
         equipes: equipes,
         handleSelecionado,
         handleSubmit,
         handleNomeJogador,
+        timesInscritos,
+        loading,
       }}
     >
       {children}

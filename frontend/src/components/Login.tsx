@@ -1,14 +1,13 @@
 import { useLogin } from "../contexts/LoginContext";
 import hclogo from "../assets/image.png";
 
+
 export default function Login() {
-  const {
-    timesInscritos,
-    handleSelecionado,
-    handleSubmit,
-    handleNomeJogador,
-    equipes,
-  } = useLogin();
+  const { handleSelecionado, handleSubmit, handleNomeJogador, equipes, loading, timesInscritos } =
+    useLogin();
+
+  if (loading)
+    return <p className="flex-1 justify-center items-center">Carregando...</p>;
 
   return (
     <form
@@ -60,7 +59,7 @@ export default function Login() {
       <div>
         <p className=" mb-2 text-3xl! text-border">
           {timesInscritos &&
-            timesInscritos.map((t) => `Nome: ${t.nome}\nPais: ${t.pais}`)}
+            timesInscritos.map((t) => `Nome: ${t.nomeJogador}\nPais: ${t.timeJogador}\n\n`)}
         </p>
       </div>
     </form>
