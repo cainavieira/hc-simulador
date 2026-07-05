@@ -3,6 +3,7 @@ import { timesMock } from "../data/timesMock";
 import type { Equipe } from "../data/timesMock";
 import { sendTimeInscrito, getTimesInscritos } from "../services/useTimes";
 import type { TimesInscritos } from "../services/useTimes";
+import { useNavegacao } from "./NavegacaoContext";
 
 type LoginContextType = {
   equipes: Equipe[];
@@ -23,7 +24,7 @@ export function LoginProvider({ children }: { children: React.ReactNode }) {
   const [equipes, setEquipes] = useState<Equipe[]>(timesMock);
   const [paisSelecionado, setPaisSelecionado] = useState<Equipe | null>(null);
   const [nomeJogador, setNomeJogador] = useState<string>("");
-
+  const { marcarInscricaoEnviada } = useNavegacao();
 
   async function handleTimesInscritos(paisSelecionado: Equipe) {
     const inscrito = {
@@ -35,6 +36,7 @@ export function LoginProvider({ children }: { children: React.ReactNode }) {
       await sendTimeInscrito(inscrito);
       const dados = await getTimesInscritos();
       setTimesInscritos(dados);
+      marcarInscricaoEnviada();
     } catch (error) {
       console.error("Erro ao enviar o time inscrito:", error);
     }

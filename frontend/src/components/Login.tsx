@@ -3,7 +3,7 @@ import hclogo from "../assets/image.png";
 
 
 export default function Login() {
-  const { handleSelecionado, handleSubmit, handleNomeJogador, equipes, loading, timesInscritos, nomeJogador, paisSelecionado } =
+  const { handleSelecionado, handleSubmit, handleNomeJogador, equipes, loading, nomeJogador, paisSelecionado } =
     useLogin();
 
   if (loading)
