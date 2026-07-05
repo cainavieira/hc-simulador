@@ -1,13 +1,17 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { getTimesInscritos } from "../services/useTimes";
 import type { TimesInscritos } from "../services/useTimes";
 import { sortearGrupos } from "../services/useGrupos";
+import { gerarRodadas } from "../services/usePartidas";
 import FaseDeGrupo from "./FaseDeGrupo";
 
 export default function TelaGrupos() {
   const [timesInscritos, setTimesInscritos] = useState<TimesInscritos[]>([]);
   const [numeroDeGrupos, setNumeroDeGrupos] = useState<string>("");
   const [senha, setSenha] = useState<string>("");
+  const [senhaRodadas, setSenhaRodadas] = useState<string>("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function buscarTimesInscritos() {
@@ -33,6 +37,15 @@ export default function TelaGrupos() {
     }
   }
 
+  async function handleGerarRodadas() {
+    try {
+      await gerarRodadas(senhaRodadas);
+      navigate("/rodadas");
+    } catch (error) {
+      console.error("Erro ao gerar as rodadas:", error);
+    }
+  }
+
   const grupoJaSorteado =
     timesInscritos.length > 0 && timesInscritos.every((t) => t.grupo);
 
@@ -43,7 +56,24 @@ export default function TelaGrupos() {
       if (!grupos[letra]) grupos[letra] = [];
       grupos[letra].push(time);
     });
-    return <FaseDeGrupo grupos={grupos} />;
+    return (
+      <div className="flex flex-col gap-4 items-center">
+        <FaseDeGrupo grupos={grupos} />
+        <input
+          type="password"
+          value={senhaRodadas}
+          onChange={(e) => setSenhaRodadas(e.currentTarget.value)}
+          placeholder="Senha do organizador"
+          className="ring-border ring-1 rounded-md font-semibold text-center p-2! text-xl"
+        />
+        <button
+          onClick={handleGerarRodadas}
+          className="ring-2 ring-cor-primaria-p p-3! rounded-md cursor-pointer text-cor-secondaria-p text-xl"
+        >
+          Gerar rodadas
+        </button>
+      </div>
+    );
   }
 
   return (

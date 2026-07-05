@@ -5,7 +5,7 @@ type FaseDeGrupoProps = {
 };
 
 export default function FaseDeGrupo({ grupos }: FaseDeGrupoProps) {
-  const letras = Object.keys(grupos);
+  const letras = Object.keys(grupos).sort();
 
   return (
     <section className="flex flex-col gap-4 w-full">
@@ -22,14 +22,14 @@ export default function FaseDeGrupo({ grupos }: FaseDeGrupoProps) {
 function GrupoCard({ letra, times }: { letra: string; times: TimesInscritos[] }) {
   return (
     <div className="rounded-md overflow-hidden ring-1 ring-border">
-      <div className="bg-cor-primaria-p px-3 py-2 text-cor-h font-bold text-left">
+      <div className="bg-emerald-800 px-3 py-2 text-cor-h font-bold text-left p-2!">
         Grupo {letra}
       </div>
       <ul>
         {times.map((time) => (
           <li
             key={time.id}
-            className="flex items-center gap-2 px-3 py-2 border-t border-border text-cor-secondaria-p"
+            className="flex items-center gap-2 px-3 py-2 border-t border-border text-cor-secondaria-p p-2!"
           >
             <img
               src={`https://flagsapi.com/${time.codigoPais}/flat/64.png`}
