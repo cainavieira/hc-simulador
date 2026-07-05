@@ -78,11 +78,19 @@ public class PartidaController {
         partidaService.gerarSemis(senha);
     }
 
-    // Aberto pra todo mundo, sem senha — estatística da fase de mata-mata pedida
-    // (?fase=OITAVAS|QUARTAS|SEMIS), sem separação por grupo.
+    // Só o organizador chama, com a senha. Cria a final (vencedores da semifinal)
+    // e a disputa de terceiro lugar (perdedores da semifinal) de uma vez só.
+    @PostMapping("/gerar-final")
+    @ResponseStatus(HttpStatus.OK)
+    public void gerarFinal(@RequestParam String senha) {
+        partidaService.gerarFinal(senha);
+    }
+
+    // Aberto pra todo mundo, sem senha — estatística acumulada de todas as fases
+    // já jogadas (grupos + mata-mata), sem separação por grupo.
     @GetMapping("/estatisticas")
     @ResponseStatus(HttpStatus.OK)
-    public List<LinhaClassificacao> getEstatisticas(@RequestParam String fase) {
-        return partidaService.getEstatisticas(fase);
+    public List<LinhaClassificacao> getEstatisticas() {
+        return partidaService.getEstatisticas();
     }
 }

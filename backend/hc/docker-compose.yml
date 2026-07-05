@@ -7,6 +7,8 @@ services:
       - POSTGRES_PASSWORD=8462
     ports:
       - "5432:5432"
+    volumes:
+      - dados_postgres:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d app-hc"]
       interval: 5s
@@ -18,3 +20,6 @@ services:
       - "7000:7000"
     depends_on:
       - db-hc-postgres
+
+volumes:
+  dados_postgres:

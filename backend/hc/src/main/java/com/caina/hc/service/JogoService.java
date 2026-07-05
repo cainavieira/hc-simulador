@@ -8,6 +8,8 @@ public class JogoService {
     // Senha fixa, só o organizador sabe.
     private static final String SENHA_MESTRE = "Lamelao12@!";
 
+
+    //boolean simples de memoria sem persistencia que quebra o app deixando sempre true depois de um post
     private boolean jogoIniciado = false;
 
     public boolean isJogoIniciado() {

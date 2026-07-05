@@ -179,6 +179,40 @@ public class PartidaService {
         gerarProximaFase("QUARTAS", "SEMIS", senha);
     }
 
+    // Diferente de gerarProximaFase: a semifinal produz duas partidas (a final,
+    // com os dois vencedores, e a disputa de terceiro lugar, com os dois
+    // perdedores), então não dá pra reaproveitar o cruzamento simples de
+    // vencedor-a-vencedor.
+    public void gerarFinal(String senha) {
+        jogoService.validarSenha(senha);
+
+        boolean finalJaExiste = partidaRepository.findAll().stream()
+                .anyMatch(p -> "FINAL".equals(p.getFase()) || "TERCEIRO".equals(p.getFase()));
+        if (finalJaExiste) {
+            throw new RuntimeException();
+        }
+
+        List<Partida> semis = partidaRepository.findAll().stream()
+                .filter(p -> "SEMIS".equals(p.getFase()))
+                .sorted(Comparator.comparingInt(Partida::getId))
+                .toList();
+
+        if (semis.size() != 2 || semis.stream().anyMatch(p -> p.getVencedorId() == null)) {
+            throw new RuntimeException();
+        }
+
+        Partida semi1 = semis.get(0);
+        Partida semi2 = semis.get(1);
+        int vencedor1 = semi1.getVencedorId();
+        int vencedor2 = semi2.getVencedorId();
+        int perdedor1 = vencedor1 == semi1.getTimeCasaId() ? semi1.getTimeVisitanteId() : semi1.getTimeCasaId();
+        int perdedor2 = vencedor2 == semi2.getTimeCasaId() ? semi2.getTimeVisitanteId() : semi2.getTimeCasaId();
+
+        partidaRepository.saveAll(List.of(
+                new Partida("FINAL", null, 1, vencedor1, vencedor2),
+                new Partida("TERCEIRO", null, 1, perdedor1, perdedor2)));
+    }
+
     public List<Partida> getPartidas() {
         return partidaRepository.findAll();
     }
@@ -250,25 +284,20 @@ public class PartidaService {
     }
 
     // Igual à classificação, mas sem separar por grupo (não existe mais grupo
-    // depois da fase de grupos) e só considerando as partidas da fase de
-    // mata-mata pedida ("OITAVAS", "QUARTAS" ou "SEMIS").
-    public List<LinhaClassificacao> getEstatisticas(String fase) {
+    // depois da fase de grupos) e **acumulando todas as fases já jogadas**
+    // (GRUPOS + OITAVAS + QUARTAS + SEMIS), o placar de um time que caiu nas
+    // oitavas continua contando dali pra frente, exatamente como a estatística
+    // de um campeonato de verdade. Não faz sentido zerar a cada fase nova.
+    public List<LinhaClassificacao> getEstatisticas() {
         List<TimeInscrito> times = timeInscritoRepository.findAll();
         List<Partida> partidas = partidaRepository.findAll();
 
         Map<Integer, LinhaClassificacao> linhasPorTimeId = new HashMap<>();
+        for (TimeInscrito time : times) {
+            linhasPorTimeId.put(time.getId(), new LinhaClassificacao(time));
+        }
 
         for (Partida partida : partidas) {
-            if (!fase.equals(partida.getFase())) {
-                continue;
-            }
-            linhasPorTimeId.computeIfAbsent(
-                    partida.getTimeCasaId(),
-                    id -> new LinhaClassificacao(buscarTimePorId(times, id)));
-            linhasPorTimeId.computeIfAbsent(
-                    partida.getTimeVisitanteId(),
-                    id -> new LinhaClassificacao(buscarTimePorId(times, id)));
-
             if (partida.getPlacarCasa() == null || partida.getPlacarVisitante() == null) {
                 continue;
             }
@@ -281,13 +310,6 @@ public class PartidaService {
                                 .thenComparing(Comparator.comparingInt(LinhaClassificacao::getSg).reversed())
                                 .thenComparing(Comparator.comparingInt(LinhaClassificacao::getGp).reversed()))
                 .toList();
-    }
-
-    private TimeInscrito buscarTimePorId(List<TimeInscrito> times, int id) {
-        return times.stream()
-                .filter(t -> t.getId() == id)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException());
     }
 
     private void atualizarLinhas(Map<Integer, LinhaClassificacao> linhasPorTimeId, Partida partida) {
