@@ -23,6 +23,11 @@ public class PartidaService {
 
     private static final int TOTAL_OITAVAS = 16;
 
+    // "Time fantasma" usado só internamente em gerarRodadas pra grupos com
+    // número ímpar de times — nunca vira Partida de verdade (ver lá embaixo),
+    // e nunca colide com um id real (IDENTITY sempre gera positivo).
+    private static final int BYE = -1;
+
     private final PartidaRepository partidaRepository;
     private final TimeInscritoRepository timeInscritoRepository;
     private final JogoService jogoService;
@@ -53,20 +58,24 @@ public class PartidaService {
             String grupo = entry.getKey();
             List<TimeInscrito> timesDoGrupo = entry.getValue();
 
-            // Por enquanto só suporta grupos com número par de times.
-            // Pra suportar ímpar depois: adicionar um "bye" (time fantasma, id -1)
-            // na lista antes de gerar os confrontos, e não criar Partida quando
-            // um dos lados do confronto for o bye (esse time "descansa" na rodada).
-            if (timesDoGrupo.size() % 2 != 0) {
-                throw new RuntimeException();
+            List<Integer> ids = new ArrayList<>(timesDoGrupo.stream().map(TimeInscrito::getId).toList());
+
+            // Grupo com número ímpar de times: entra um "bye" na lista antes de
+            // gerar os confrontos, pelo mesmo método do círculo. Quem cruza com
+            // o bye numa rodada só descansa naquela rodada — nenhuma Partida é
+            // criada pra esse confronto (ver o "continue" logo abaixo).
+            if (ids.size() % 2 != 0) {
+                ids.add(BYE);
             }
 
-            List<Integer> ids = timesDoGrupo.stream().map(TimeInscrito::getId).toList();
             List<List<int[]>> confrontosPorRodada = gerarConfrontos(ids);
 
             for (int i = 0; i < confrontosPorRodada.size(); i++) {
                 int rodada = i + 1;
                 for (int[] confronto : confrontosPorRodada.get(i)) {
+                    if (confronto[0] == BYE || confronto[1] == BYE) {
+                        continue;
+                    }
                     novasPartidas.add(
                             new Partida("GRUPOS", grupo, rodada, confronto[0], confronto[1]));
                 }
