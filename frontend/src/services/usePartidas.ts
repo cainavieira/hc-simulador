@@ -1,6 +1,5 @@
 import type { TimesInscritos } from "./useTimes";
-
-const URL_BASE = "http://192.168.1.15:7000/api/v1";
+import { URL_BASE } from "./apiConfig";
 
 export type Partida = {
   id: number;

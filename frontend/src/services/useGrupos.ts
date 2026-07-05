@@ -1,4 +1,4 @@
-const URL_BASE = "http://192.168.1.15:7000/api/v1";
+import { URL_BASE } from "./apiConfig";
 
 async function sortearGrupos(numeroDeGrupos: number, senha: string) {
   const sendData = async () => {
