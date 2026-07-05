@@ -5,6 +5,7 @@ export type TimesInscritos = {
   nomeJogador: string;
   timeJogador: string;
   codigoPais: string;
+  grupo: string | null;
 };
 
 async function getTimesInscritos() {

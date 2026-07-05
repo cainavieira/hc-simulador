@@ -1,0 +1,74 @@
+import { useState, useEffect } from "react";
+import { getTimesInscritos } from "../services/useTimes";
+import type { TimesInscritos } from "../services/useTimes";
+import { sortearGrupos } from "../services/useGrupos";
+import FaseDeGrupo from "./FaseDeGrupo";
+
+export default function TelaGrupos() {
+  const [timesInscritos, setTimesInscritos] = useState<TimesInscritos[]>([]);
+  const [numeroDeGrupos, setNumeroDeGrupos] = useState<string>("");
+  const [senha, setSenha] = useState<string>("");
+
+  useEffect(() => {
+    async function buscarTimesInscritos() {
+      try {
+        const dados = await getTimesInscritos();
+        setTimesInscritos(dados);
+      } catch (error) {
+        console.error("Erro ao buscar os times inscritos:", error);
+      }
+    }
+    buscarTimesInscritos();
+    const intervalId = setInterval(buscarTimesInscritos, 3000);
+    return () => clearInterval(intervalId);
+  }, []);
+
+  async function handleSortearGrupos() {
+    try {
+      await sortearGrupos(Number(numeroDeGrupos), senha);
+      const dados = await getTimesInscritos();
+      setTimesInscritos(dados);
+    } catch (error) {
+      console.error("Erro ao sortear grupos:", error);
+    }
+  }
+
+  const grupoJaSorteado =
+    timesInscritos.length > 0 && timesInscritos.every((t) => t.grupo);
+
+  if (grupoJaSorteado) {
+    const grupos: Record<string, TimesInscritos[]> = {};
+    timesInscritos.forEach((time) => {
+      const letra = time.grupo as string;
+      if (!grupos[letra]) grupos[letra] = [];
+      grupos[letra].push(time);
+    });
+    return <FaseDeGrupo grupos={grupos} />;
+  }
+
+  return (
+    <div className="flex flex-col gap-4 items-center">
+      <p>Aguardando o sorteio dos grupos...</p>
+      <input
+        type="number"
+        value={numeroDeGrupos}
+        onChange={(e) => setNumeroDeGrupos(e.currentTarget.value)}
+        placeholder="Número de grupos"
+        className="ring-border ring-1 rounded-md font-semibold text-center p-2! text-xl"
+      />
+      <input
+        type="password"
+        value={senha}
+        onChange={(e) => setSenha(e.currentTarget.value)}
+        placeholder="Senha do organizador"
+        className="ring-border ring-1 rounded-md font-semibold text-center p-2! text-xl"
+      />
+      <button
+        onClick={handleSortearGrupos}
+        className="ring-2 ring-cor-primaria-p p-3! rounded-md cursor-pointer text-cor-secondaria-p text-xl"
+      >
+        Sortear grupos
+      </button>
+    </div>
+  );
+}

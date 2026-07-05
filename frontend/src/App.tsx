@@ -2,6 +2,7 @@ import "./App.css";
 import Header from "./components/Header";
 import Login from "./components/Login";
 import TelaEspera from "./components/TelaEspera";
+import TelaGrupos from "./components/TelaGrupos";
 import { LoginProvider } from "./contexts/LoginContext";
 import { NavegacaoProvider, useNavegacao } from "./contexts/NavegacaoContext";
 import { Routes, Route, Navigate } from "react-router-dom";
@@ -17,6 +18,10 @@ function Conteudo() {
       <Route
         path="/espera"
         element={inscricaoEnviada ? <TelaEspera /> : <Navigate to="/" />}
+      />
+      <Route
+        path="/grupos"
+        element={inscricaoEnviada ? <TelaGrupos /> : <Navigate to="/" />}
       />
     </Routes>
   );

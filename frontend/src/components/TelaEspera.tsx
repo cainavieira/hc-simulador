@@ -1,18 +1,19 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useLogin } from "../contexts/LoginContext";
 import { getStatusJogo, iniciarJogo } from "../services/useJogo";
 
 export default function TelaEspera() {
   const { timesInscritos } = useLogin();
-  const [jogoIniciado, setJogoIniciado] = useState<boolean>(false);
   const [senha, setSenha] = useState<string>("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const intervalId = setInterval(async () => {
       try {
         const iniciado = await getStatusJogo();
         if (iniciado) {
-          setJogoIniciado(true);
+          navigate("/grupos");
         }
       } catch (error) {
         console.error("Erro ao checar status do jogo:", error);
@@ -20,7 +21,7 @@ export default function TelaEspera() {
     }, 3000);
 
     return () => clearInterval(intervalId);
-  }, []);
+  }, [navigate]);
 
   async function handleIniciarJogo() {
     try {
@@ -28,10 +29,6 @@ export default function TelaEspera() {
     } catch (error) {
       console.error("Senha errada ou erro ao iniciar o jogo:", error);
     }
-  }
-
-  if (jogoIniciado) {
-    return <p>O jogo começou!</p>;
   }
 
   return (

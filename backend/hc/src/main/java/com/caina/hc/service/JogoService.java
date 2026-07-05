@@ -15,9 +15,13 @@ public class JogoService {
     }
 
     public void iniciarJogo(String senha) {
+        validarSenha(senha);
+        jogoIniciado = true;
+    }
+
+    public void validarSenha(String senha) {
         if (!senha.equals(SENHA_MESTRE)) {
             throw new RuntimeException();
         }
-        jogoIniciado = true;
     }
 }

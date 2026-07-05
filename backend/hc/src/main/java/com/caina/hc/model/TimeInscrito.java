@@ -30,6 +30,8 @@ public class TimeInscrito {
     @NotEmpty
     private String codigoPais;
 
+    private String grupo;
+
     public TimeInscrito(String nome, String time, String codigo) {
         this.nomeJogador = nome;
         this.timeJogador = time;
