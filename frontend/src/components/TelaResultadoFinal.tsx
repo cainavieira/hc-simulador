@@ -44,7 +44,7 @@ export default function TelaResultadoFinal() {
 
   const posicoes: Posicao[] = [
     { posicao: 1, titulo: "1º Lugar", timeId: primeiroId, corFundo: "bg-yellow-400", corTexto: "text-black" },
-    { posicao: 2, titulo: "2º Lugar", timeId: segundoId, corFundo: "bg-gray-300", corTexto: "text-black" },
+    { posicao: 2, titulo: "2º Lugar", timeId: segundoId, corFundo: "bg-gray-400", corTexto: "text-black" },
     { posicao: 3, titulo: "3º Lugar", timeId: terceiroId, corFundo: "bg-[#cd7f32]", corTexto: "text-white" },
   ];
 

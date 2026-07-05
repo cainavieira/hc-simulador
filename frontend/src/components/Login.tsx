@@ -3,8 +3,16 @@ import hclogo from "../assets/image.png";
 
 
 export default function Login() {
-  const { handleSelecionado, handleSubmit, handleNomeJogador, equipes, loading, nomeJogador, paisSelecionado } =
-    useLogin();
+  const {
+    handleSelecionado,
+    handleSubmit,
+    handleNomeJogador,
+    equipes,
+    loading,
+    nomeJogador,
+    paisSelecionado,
+    erroInscricao,
+  } = useLogin();
 
   if (loading)
     <div className="flex-1 justify-center items-center w100 h-screen flex">
@@ -52,6 +60,9 @@ export default function Login() {
             ))}
         </select>
       </div>
+      {erroInscricao && (
+        <p className="text-red-500 font-semibold text-center">{erroInscricao}</p>
+      )}
       <div>
         <button
           onClick={handleSubmit}

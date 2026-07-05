@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { timesMock } from "../data/timesMock";
+import { timesMockOrdenado } from "../data/timesMock";
 import type { Equipe } from "../data/timesMock";
 import { sendTimeInscrito, getTimesInscritos } from "../services/useTimes";
 import type { TimesInscritos } from "../services/useTimes";
@@ -14,6 +14,7 @@ type LoginContextType = {
   timesInscritos: TimesInscritos[];
   nomeJogador: string;
   paisSelecionado: Equipe | null;
+  erroInscricao: string | null;
 };
 
 const LoginContext = createContext<LoginContextType | null>(null);
@@ -21,9 +22,10 @@ const LoginContext = createContext<LoginContextType | null>(null);
 export function LoginProvider({ children }: { children: React.ReactNode }) {
   const [timesInscritos, setTimesInscritos] = useState<TimesInscritos[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [equipes, setEquipes] = useState<Equipe[]>(timesMock);
+  const [equipes, setEquipes] = useState<Equipe[]>(timesMockOrdenado);
   const [paisSelecionado, setPaisSelecionado] = useState<Equipe | null>(null);
   const [nomeJogador, setNomeJogador] = useState<string>("");
+  const [erroInscricao, setErroInscricao] = useState<string | null>(null);
   const { marcarInscricaoEnviada } = useNavegacao();
 
   async function handleTimesInscritos(paisSelecionado: Equipe) {
@@ -39,12 +41,16 @@ export function LoginProvider({ children }: { children: React.ReactNode }) {
       marcarInscricaoEnviada();
     } catch (error) {
       console.error("Erro ao enviar o time inscrito:", error);
+      setErroInscricao(
+        "Esse time (ou nome) já foi escolhido por outra pessoa! Escolha outro país.",
+      );
     }
   }
   function handleSelecionado(e: React.ChangeEvent<HTMLSelectElement>) {
     const pais = e.currentTarget.value;
     const equipeSelecionada = equipes?.find((item) => item.pais === pais);
     setPaisSelecionado(equipeSelecionada ?? null);
+    setErroInscricao(null);
   }
 
   function handleSubmit(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
@@ -61,6 +67,7 @@ export function LoginProvider({ children }: { children: React.ReactNode }) {
 
   function handleNomeJogador(e: React.ChangeEvent<HTMLInputElement>) {
     setNomeJogador(e.currentTarget.value);
+    setErroInscricao(null);
   }
 
   useEffect(() => {
@@ -89,6 +96,7 @@ export function LoginProvider({ children }: { children: React.ReactNode }) {
         loading,
         nomeJogador,
         paisSelecionado,
+        erroInscricao,
       }}
     >
       {children}
