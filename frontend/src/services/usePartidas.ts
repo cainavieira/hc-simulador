@@ -110,11 +110,40 @@ async function gerarOitavas(senha: string) {
 }
 export { gerarOitavas };
 
-async function getEstatisticas() {
+async function gerarQuartas(senha: string) {
+  const sendData = async () => {
+    const response = await fetch(
+      `${URL_BASE}/partidas/gerar-quartas?senha=${encodeURIComponent(senha)}`,
+      { method: "POST" },
+    );
+    if (!response.ok) {
+      throw new Error();
+    }
+  };
+  return await sendData();
+}
+export { gerarQuartas };
+
+async function gerarSemis(senha: string) {
+  const sendData = async () => {
+    const response = await fetch(
+      `${URL_BASE}/partidas/gerar-semis?senha=${encodeURIComponent(senha)}`,
+      { method: "POST" },
+    );
+    if (!response.ok) {
+      throw new Error();
+    }
+  };
+  return await sendData();
+}
+export { gerarSemis };
+
+async function getEstatisticas(fase: string) {
   const fetchData = async () => {
-    const response = await fetch(`${URL_BASE}/partidas/estatisticas`, {
-      method: "GET",
-    });
+    const response = await fetch(
+      `${URL_BASE}/partidas/estatisticas?fase=${encodeURIComponent(fase)}`,
+      { method: "GET" },
+    );
     if (!response.ok) {
       throw new Error();
     }

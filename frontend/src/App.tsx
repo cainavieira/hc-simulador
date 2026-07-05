@@ -6,6 +6,8 @@ import TelaGrupos from "./components/TelaGrupos";
 import TelaRodadas from "./components/TelaRodadas";
 import TelaClassificacao from "./components/TelaClassificacao";
 import TelaOitavas from "./components/TelaOitavas";
+import TelaQuartas from "./components/TelaQuartas";
+import TelaSemis from "./components/TelaSemis";
 import TelaEstatisticas from "./components/TelaEstatisticas";
 import { LoginProvider } from "./contexts/LoginContext";
 import { NavegacaoProvider, useNavegacao } from "./contexts/NavegacaoContext";
@@ -40,7 +42,15 @@ function Conteudo() {
         element={inscricaoEnviada ? <TelaOitavas /> : <Navigate to="/" />}
       />
       <Route
-        path="/estatisticas"
+        path="/quartas"
+        element={inscricaoEnviada ? <TelaQuartas /> : <Navigate to="/" />}
+      />
+      <Route
+        path="/semis"
+        element={inscricaoEnviada ? <TelaSemis /> : <Navigate to="/" />}
+      />
+      <Route
+        path="/estatisticas/:fase"
         element={inscricaoEnviada ? <TelaEstatisticas /> : <Navigate to="/" />}
       />
     </Routes>

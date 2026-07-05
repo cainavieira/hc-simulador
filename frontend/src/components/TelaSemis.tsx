@@ -1,19 +1,17 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useLogin } from "../contexts/LoginContext";
-import { getPartidas, registrarResultados, gerarQuartas } from "../services/usePartidas";
+import { getPartidas, registrarResultados } from "../services/usePartidas";
 import type { Partida, ResultadoPartida } from "../services/usePartidas";
 
 type PlacarInput = { placarCasa: string; placarVisitante: string };
 
-export default function TelaOitavas() {
+export default function TelaSemis() {
   const { timesInscritos } = useLogin();
   const [partidas, setPartidas] = useState<Partida[]>([]);
   const [placares, setPlacares] = useState<Record<number, PlacarInput>>({});
   const [penaltiVencedor, setPenaltiVencedor] = useState<Record<number, number>>({});
   const [senha, setSenha] = useState<string>("");
-  const [senhaQuartas, setSenhaQuartas] = useState<string>("");
-  const navigate = useNavigate();
 
   useEffect(() => {
     async function buscarPartidas() {
@@ -54,7 +52,7 @@ export default function TelaOitavas() {
 
   async function handleConfirmarResultados() {
     try {
-      const resultados: ResultadoPartida[] = oitavas.map((partida) => ({
+      const resultados: ResultadoPartida[] = semis.map((partida) => ({
         id: partida.id,
         placarCasa: Number(placares[partida.id]?.placarCasa ?? 0),
         placarVisitante: Number(placares[partida.id]?.placarVisitante ?? 0),
@@ -66,50 +64,29 @@ export default function TelaOitavas() {
       setPlacares({});
       setPenaltiVencedor({});
     } catch (error) {
-      console.error("Erro ao registrar os resultados das oitavas:", error);
+      console.error("Erro ao registrar os resultados da semifinal:", error);
     }
   }
 
-  async function handleGerarQuartas() {
-    try {
-      await gerarQuartas(senhaQuartas);
-      navigate("/quartas");
-    } catch (error) {
-      console.error("Erro ao gerar as quartas:", error);
-    }
+  const semis = partidas.filter((p) => p.fase === "SEMIS");
+
+  if (semis.length === 0) {
+    return <p className="text-lg! font-bold">Aguardando a semifinal ser gerada...</p>;
   }
 
-  const oitavas = partidas.filter((p) => p.fase === "OITAVAS");
+  const semisSemVencedor = semis.filter((p) => p.vencedorId === null);
 
-  if (oitavas.length === 0) {
-    return <p className="text-lg! font-bold">Aguardando as oitavas serem geradas...</p>;
-  }
-
-  const oitavasSemVencedor = oitavas.filter((p) => p.vencedorId === null);
-
-  if (oitavasSemVencedor.length === 0) {
+  if (semisSemVencedor.length === 0) {
     return (
       <div className="flex flex-col gap-4 items-center">
-        <p className="text-lg! font-bold">Oitavas completas! Todos os confrontos foram decididos.</p>
+        <p className="text-lg! font-bold">Semifinal completa! Todos os confrontos foram decididos.</p>
+        <p className="text-cor-secondaria-p">A final ainda não foi implementada.</p>
         <Link
-          to="/estatisticas/oitavas"
+          to="/estatisticas/semis"
           className="ring-2 ring-cor-primaria-p p-3! rounded-md text-cor-secondaria-p text-xl"
         >
           Ver estatísticas
         </Link>
-        <input
-          type="password"
-          value={senhaQuartas}
-          onChange={(e) => setSenhaQuartas(e.currentTarget.value)}
-          placeholder="Senha do organizador"
-          className="ring-border ring-1 rounded-md font-semibold text-center p-2! text-xl"
-        />
-        <button
-          onClick={handleGerarQuartas}
-          className="ring-2 ring-cor-primaria-p p-3! rounded-md cursor-pointer text-cor-secondaria-p text-xl"
-        >
-          Gerar quartas
-        </button>
       </div>
     );
   }
@@ -120,12 +97,12 @@ export default function TelaOitavas() {
 
   return (
     <div className="flex flex-col gap-4 items-center">
-      <h2 className="text-cor-h text-xl! font-bold">Oitavas de Final</h2>
-      <Link to="/estatisticas/oitavas" className="text-cor-secondaria-p underline">
+      <h2 className="text-cor-h text-xl! font-bold">Semifinal</h2>
+      <Link to="/estatisticas/semis" className="text-cor-secondaria-p underline">
         Ver estatísticas
       </Link>
       <div className="flex flex-col gap-3 w-full">
-        {oitavas.map((partida) => {
+        {semis.map((partida) => {
           const timeCasa = nomeDoTime(partida.timeCasaId);
           const timeVisitante = nomeDoTime(partida.timeVisitanteId);
           const empatado = estaEmpatado(partida);

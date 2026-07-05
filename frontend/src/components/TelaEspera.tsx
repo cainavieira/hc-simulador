@@ -33,8 +33,8 @@ export default function TelaEspera() {
 
   return (
     <div className="flex flex-col gap-4 items-center">
-      <p className="text-lg!">Aguardando o organizador iniciar o jogo...</p>
-      <p className="text-md! font-bold">{timesInscritos.length} participante(s) inscrito(s)</p>
+      <p className="text-2xl! my-2! text-amber-50">Aguardando o organizador iniciar o jogo...</p>
+      <p className=" font-bold text-xl! my-2! ">{timesInscritos.length} participante(s) inscrito(s)</p>
       <ul className="flex flex-col gap-2">
         {timesInscritos.map((t) => (
           <li key={t.id} className="flex items-center gap-2">

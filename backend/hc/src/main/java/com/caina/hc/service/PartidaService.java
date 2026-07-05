@@ -139,6 +139,46 @@ public class PartidaService {
         partidaRepository.saveAll(novasPartidas);
     }
 
+    // Reaproveitado por gerarQuartas/gerarSemis: cruza os vencedores da fase
+    // anterior em ordem (partida 1 x partida 2, partida 3 x partida 4, ...),
+    // mantendo a ordem do chaveamento sem precisar recalcular seeding.
+    private void gerarProximaFase(String faseAnterior, String novaFase, String senha) {
+        jogoService.validarSenha(senha);
+
+        boolean novaFaseJaExiste = partidaRepository.findAll().stream()
+                .anyMatch(p -> novaFase.equals(p.getFase()));
+        if (novaFaseJaExiste) {
+            throw new RuntimeException();
+        }
+
+        List<Partida> partidasDaFaseAnterior = partidaRepository.findAll().stream()
+                .filter(p -> faseAnterior.equals(p.getFase()))
+                .sorted(Comparator.comparingInt(Partida::getId))
+                .toList();
+
+        if (partidasDaFaseAnterior.isEmpty()
+                || partidasDaFaseAnterior.stream().anyMatch(p -> p.getVencedorId() == null)) {
+            throw new RuntimeException();
+        }
+
+        List<Partida> novasPartidas = new ArrayList<>();
+        for (int i = 0; i < partidasDaFaseAnterior.size(); i += 2) {
+            int casa = partidasDaFaseAnterior.get(i).getVencedorId();
+            int visitante = partidasDaFaseAnterior.get(i + 1).getVencedorId();
+            novasPartidas.add(new Partida(novaFase, null, 1, casa, visitante));
+        }
+
+        partidaRepository.saveAll(novasPartidas);
+    }
+
+    public void gerarQuartas(String senha) {
+        gerarProximaFase("OITAVAS", "QUARTAS", senha);
+    }
+
+    public void gerarSemis(String senha) {
+        gerarProximaFase("QUARTAS", "SEMIS", senha);
+    }
+
     public List<Partida> getPartidas() {
         return partidaRepository.findAll();
     }
@@ -210,15 +250,16 @@ public class PartidaService {
     }
 
     // Igual à classificação, mas sem separar por grupo (não existe mais grupo
-    // depois da fase de grupos) e só considerando as partidas de oitavas.
-    public List<LinhaClassificacao> getEstatisticas() {
+    // depois da fase de grupos) e só considerando as partidas da fase de
+    // mata-mata pedida ("OITAVAS", "QUARTAS" ou "SEMIS").
+    public List<LinhaClassificacao> getEstatisticas(String fase) {
         List<TimeInscrito> times = timeInscritoRepository.findAll();
         List<Partida> partidas = partidaRepository.findAll();
 
         Map<Integer, LinhaClassificacao> linhasPorTimeId = new HashMap<>();
 
         for (Partida partida : partidas) {
-            if (!"OITAVAS".equals(partida.getFase())) {
+            if (!fase.equals(partida.getFase())) {
                 continue;
             }
             linhasPorTimeId.computeIfAbsent(
