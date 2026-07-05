@@ -4,18 +4,21 @@ const URL_BASE = "http://192.168.1.15:7000/api/v1";
 
 export type Partida = {
   id: number;
-  grupo: string;
+  fase: string;
+  grupo: string | null;
   rodada: number;
   timeCasaId: number;
   timeVisitanteId: number;
   placarCasa: number | null;
   placarVisitante: number | null;
+  vencedorId: number | null;
 };
 
 export type ResultadoPartida = {
   id: number;
   placarCasa: number;
   placarVisitante: number;
+  vencedorId: number | null;
 };
 
 export type LinhaClassificacao = {
@@ -92,3 +95,32 @@ async function getClassificacao() {
   return await fetchData();
 }
 export { getClassificacao };
+
+async function gerarOitavas(senha: string) {
+  const sendData = async () => {
+    const response = await fetch(
+      `${URL_BASE}/partidas/gerar-oitavas?senha=${encodeURIComponent(senha)}`,
+      { method: "POST" },
+    );
+    if (!response.ok) {
+      throw new Error();
+    }
+  };
+  return await sendData();
+}
+export { gerarOitavas };
+
+async function getEstatisticas() {
+  const fetchData = async () => {
+    const response = await fetch(`${URL_BASE}/partidas/estatisticas`, {
+      method: "GET",
+    });
+    if (!response.ok) {
+      throw new Error();
+    }
+    const dados = await response.json();
+    return dados;
+  };
+  return await fetchData();
+}
+export { getEstatisticas };

@@ -21,6 +21,8 @@ import java.util.stream.Collectors;
 @Transactional
 public class PartidaService {
 
+    private static final int TOTAL_OITAVAS = 16;
+
     private final PartidaRepository partidaRepository;
     private final TimeInscritoRepository timeInscritoRepository;
     private final JogoService jogoService;
@@ -65,7 +67,8 @@ public class PartidaService {
             for (int i = 0; i < confrontosPorRodada.size(); i++) {
                 int rodada = i + 1;
                 for (int[] confronto : confrontosPorRodada.get(i)) {
-                    novasPartidas.add(new Partida(grupo, rodada, confronto[0], confronto[1]));
+                    novasPartidas.add(
+                            new Partida("GRUPOS", grupo, rodada, confronto[0], confronto[1]));
                 }
             }
         }
@@ -97,6 +100,45 @@ public class PartidaService {
         return rodadas;
     }
 
+    // Gera as oitavas cruzando os classificados de cada grupo. Funciona com
+    // qualquer quantidade de classificados por grupo: junta todo mundo numa
+    // lista única (ordenada por posição, depois por grupo) e cruza o melhor
+    // colocado dessa lista com o pior, o segundo com o penúltimo, e assim por
+    // diante — tipo chave de torneio de tênis. Isso garante que ninguém
+    // enfrenta alguém do próprio grupo, e generaliza o caso clássico
+    // ("1º vs 2º de outro grupo") pra qualquer número de classificados.
+    public void gerarOitavas(String senha) {
+        jogoService.validarSenha(senha);
+
+        boolean oitavasJaExistem = partidaRepository.findAll().stream()
+                .anyMatch(p -> "OITAVAS".equals(p.getFase()));
+        if (oitavasJaExistem) {
+            throw new RuntimeException();
+        }
+
+        Map<String, List<LinhaClassificacao>> classificacao = getClassificacao();
+        List<String> gruposOrdenados = classificacao.keySet().stream().sorted().toList();
+        int numeroDeGrupos = gruposOrdenados.size();
+        int quantosPassam = TOTAL_OITAVAS / numeroDeGrupos;
+
+        List<Integer> classificadosOrdenados = new ArrayList<>();
+        for (int posicao = 0; posicao < quantosPassam; posicao++) {
+            for (String grupo : gruposOrdenados) {
+                classificadosOrdenados.add(classificacao.get(grupo).get(posicao).getTime().getId());
+            }
+        }
+
+        List<Partida> novasPartidas = new ArrayList<>();
+        int n = classificadosOrdenados.size();
+        for (int i = 0; i < n / 2; i++) {
+            int casa = classificadosOrdenados.get(i);
+            int visitante = classificadosOrdenados.get(n - 1 - i);
+            novasPartidas.add(new Partida("OITAVAS", null, 1, casa, visitante));
+        }
+
+        partidaRepository.saveAll(novasPartidas);
+    }
+
     public List<Partida> getPartidas() {
         return partidaRepository.findAll();
     }
@@ -109,6 +151,20 @@ public class PartidaService {
                     .orElseThrow(() -> new RuntimeException());
             partida.setPlacarCasa(resultado.placarCasa());
             partida.setPlacarVisitante(resultado.placarVisitante());
+
+            if (resultado.placarCasa() > resultado.placarVisitante()) {
+                partida.setVencedorId(partida.getTimeCasaId());
+            } else if (resultado.placarVisitante() > resultado.placarCasa()) {
+                partida.setVencedorId(partida.getTimeVisitanteId());
+            } else if (!"GRUPOS".equals(partida.getFase())) {
+                // Empate no mata-mata precisa de pênaltis — o front manda quem venceu.
+                if (resultado.vencedorId() == null) {
+                    throw new RuntimeException();
+                }
+                partida.setVencedorId(resultado.vencedorId());
+            }
+            // Empate na fase de grupos: vencedorId fica nulo, é um empate de verdade.
+
             partidaRepository.save(partida);
         }
     }
@@ -151,6 +207,46 @@ public class PartidaService {
         }
 
         return resultado;
+    }
+
+    // Igual à classificação, mas sem separar por grupo (não existe mais grupo
+    // depois da fase de grupos) e só considerando as partidas de oitavas.
+    public List<LinhaClassificacao> getEstatisticas() {
+        List<TimeInscrito> times = timeInscritoRepository.findAll();
+        List<Partida> partidas = partidaRepository.findAll();
+
+        Map<Integer, LinhaClassificacao> linhasPorTimeId = new HashMap<>();
+
+        for (Partida partida : partidas) {
+            if (!"OITAVAS".equals(partida.getFase())) {
+                continue;
+            }
+            linhasPorTimeId.computeIfAbsent(
+                    partida.getTimeCasaId(),
+                    id -> new LinhaClassificacao(buscarTimePorId(times, id)));
+            linhasPorTimeId.computeIfAbsent(
+                    partida.getTimeVisitanteId(),
+                    id -> new LinhaClassificacao(buscarTimePorId(times, id)));
+
+            if (partida.getPlacarCasa() == null || partida.getPlacarVisitante() == null) {
+                continue;
+            }
+            atualizarLinhas(linhasPorTimeId, partida);
+        }
+
+        return linhasPorTimeId.values().stream()
+                .sorted(
+                        Comparator.comparingInt(LinhaClassificacao::getPontos).reversed()
+                                .thenComparing(Comparator.comparingInt(LinhaClassificacao::getSg).reversed())
+                                .thenComparing(Comparator.comparingInt(LinhaClassificacao::getGp).reversed()))
+                .toList();
+    }
+
+    private TimeInscrito buscarTimePorId(List<TimeInscrito> times, int id) {
+        return times.stream()
+                .filter(t -> t.getId() == id)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException());
     }
 
     private void atualizarLinhas(Map<Integer, LinhaClassificacao> linhasPorTimeId, Partida partida) {

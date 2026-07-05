@@ -56,4 +56,18 @@ public class PartidaController {
     public Map<String, List<LinhaClassificacao>> getClassificacao() {
         return partidaService.getClassificacao();
     }
+
+    // Só o organizador chama, com a senha. Cruza os classificados dos grupos, uma vez só.
+    @PostMapping("/gerar-oitavas")
+    @ResponseStatus(HttpStatus.OK)
+    public void gerarOitavas(@RequestParam String senha) {
+        partidaService.gerarOitavas(senha);
+    }
+
+    // Aberto pra todo mundo, sem senha — estatística do mata-mata (sem separação por grupo).
+    @GetMapping("/estatisticas")
+    @ResponseStatus(HttpStatus.OK)
+    public List<LinhaClassificacao> getEstatisticas() {
+        return partidaService.getEstatisticas();
+    }
 }

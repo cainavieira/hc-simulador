@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useLogin } from "../contexts/LoginContext";
-import { getPartidas, registrarResultados } from "../services/usePartidas";
+import { getPartidas, registrarResultados, gerarOitavas } from "../services/usePartidas";
 import type { Partida, ResultadoPartida } from "../services/usePartidas";
 
 type PlacarInput = { placarCasa: string; placarVisitante: string };
@@ -11,6 +11,8 @@ export default function TelaRodadas() {
   const [partidas, setPartidas] = useState<Partida[]>([]);
   const [placares, setPlacares] = useState<Record<number, PlacarInput>>({});
   const [senha, setSenha] = useState<string>("");
+  const [senhaOitavas, setSenhaOitavas] = useState<string>("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function buscarPartidas() {
@@ -47,6 +49,7 @@ export default function TelaRodadas() {
         id: partida.id,
         placarCasa: Number(placares[partida.id]?.placarCasa ?? 0),
         placarVisitante: Number(placares[partida.id]?.placarVisitante ?? 0),
+        vencedorId: null,
       }));
       await registrarResultados(resultados, senha);
       const dados = await getPartidas();
@@ -57,11 +60,22 @@ export default function TelaRodadas() {
     }
   }
 
-  if (partidas.length === 0) {
+  async function handleGerarOitavas() {
+    try {
+      await gerarOitavas(senhaOitavas);
+      navigate("/oitavas");
+    } catch (error) {
+      console.error("Erro ao gerar as oitavas:", error);
+    }
+  }
+
+  const partidasDeGrupos = partidas.filter((p) => p.fase === "GRUPOS");
+
+  if (partidasDeGrupos.length === 0) {
     return <p className="text-lg! font-bold">Aguardando as rodadas serem geradas...</p>;
   }
 
-  const partidasSemPlacar = partidas.filter((p) => p.placarCasa === null);
+  const partidasSemPlacar = partidasDeGrupos.filter((p) => p.placarCasa === null);
 
   if (partidasSemPlacar.length === 0) {
     return (
@@ -73,14 +87,27 @@ export default function TelaRodadas() {
         >
           Ver classificação
         </Link>
+        <input
+          type="password"
+          value={senhaOitavas}
+          onChange={(e) => setSenhaOitavas(e.currentTarget.value)}
+          placeholder="Senha do organizador"
+          className="ring-border ring-1 rounded-md font-semibold text-center p-2! text-xl"
+        />
+        <button
+          onClick={handleGerarOitavas}
+          className="ring-2 ring-cor-primaria-p p-3! rounded-md cursor-pointer text-cor-secondaria-p text-xl"
+        >
+          Gerar oitavas
+        </button>
       </div>
     );
   }
 
   const rodadaAtual = Math.min(...partidasSemPlacar.map((p) => p.rodada));
-  const partidasDaRodada = partidas
+  const partidasDaRodada = partidasDeGrupos
     .filter((p) => p.rodada === rodadaAtual)
-    .sort((a, b) => a.grupo.localeCompare(b.grupo));
+    .sort((a, b) => (a.grupo ?? "").localeCompare(b.grupo ?? ""));
 
   function nomeDoTime(timeId: number) {
     return timesInscritos.find((t) => t.id === timeId);

@@ -5,6 +5,8 @@ import TelaEspera from "./components/TelaEspera";
 import TelaGrupos from "./components/TelaGrupos";
 import TelaRodadas from "./components/TelaRodadas";
 import TelaClassificacao from "./components/TelaClassificacao";
+import TelaOitavas from "./components/TelaOitavas";
+import TelaEstatisticas from "./components/TelaEstatisticas";
 import { LoginProvider } from "./contexts/LoginContext";
 import { NavegacaoProvider, useNavegacao } from "./contexts/NavegacaoContext";
 import { Routes, Route, Navigate } from "react-router-dom";
@@ -32,6 +34,14 @@ function Conteudo() {
       <Route
         path="/classificacao"
         element={inscricaoEnviada ? <TelaClassificacao /> : <Navigate to="/" />}
+      />
+      <Route
+        path="/oitavas"
+        element={inscricaoEnviada ? <TelaOitavas /> : <Navigate to="/" />}
+      />
+      <Route
+        path="/estatisticas"
+        element={inscricaoEnviada ? <TelaEstatisticas /> : <Navigate to="/" />}
       />
     </Routes>
   );
