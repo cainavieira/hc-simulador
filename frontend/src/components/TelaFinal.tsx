@@ -1,0 +1,175 @@
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useLogin } from "../contexts/LoginContext";
+import { getPartidas, registrarResultados } from "../services/usePartidas";
+import type { Partida, ResultadoPartida } from "../services/usePartidas";
+
+type PlacarInput = { placarCasa: string; placarVisitante: string };
+
+export default function TelaFinal() {
+  const { timesInscritos } = useLogin();
+  const [partidas, setPartidas] = useState<Partida[]>([]);
+  const [placares, setPlacares] = useState<Record<number, PlacarInput>>({});
+  const [penaltiVencedor, setPenaltiVencedor] = useState<Record<number, number>>({});
+  const [senha, setSenha] = useState<string>("");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    async function buscarPartidas() {
+      try {
+        const dados = await getPartidas();
+        setPartidas(dados);
+      } catch (error) {
+        console.error("Erro ao buscar as partidas:", error);
+      }
+    }
+    buscarPartidas();
+    const intervalId = setInterval(buscarPartidas, 3000);
+    return () => clearInterval(intervalId);
+  }, []);
+
+  function handlePlacarChange(
+    partidaId: number,
+    lado: "placarCasa" | "placarVisitante",
+    valor: string,
+  ) {
+    setPlacares((atual) => ({
+      ...atual,
+      [partidaId]: {
+        placarCasa: atual[partidaId]?.placarCasa ?? "",
+        placarVisitante: atual[partidaId]?.placarVisitante ?? "",
+        [lado]: valor,
+      },
+    }));
+  }
+
+  function estaEmpatado(partida: Partida) {
+    const placar = placares[partida.id];
+    if (!placar || placar.placarCasa === "" || placar.placarVisitante === "") {
+      return false;
+    }
+    return Number(placar.placarCasa) === Number(placar.placarVisitante);
+  }
+
+  async function handleConfirmarResultados() {
+    try {
+      const resultados: ResultadoPartida[] = confrontos.map(({ partida }) => ({
+        id: partida.id,
+        placarCasa: Number(placares[partida.id]?.placarCasa ?? 0),
+        placarVisitante: Number(placares[partida.id]?.placarVisitante ?? 0),
+        vencedorId: estaEmpatado(partida) ? (penaltiVencedor[partida.id] ?? null) : null,
+      }));
+      await registrarResultados(resultados, senha);
+      navigate("/resultado-final");
+    } catch (error) {
+      console.error("Erro ao registrar os resultados da final:", error);
+    }
+  }
+
+  const partidaFinal = partidas.find((p) => p.fase === "FINAL");
+  const partidaTerceiro = partidas.find((p) => p.fase === "TERCEIRO");
+
+  if (!partidaFinal || !partidaTerceiro) {
+    return <p className="text-lg! font-bold">Aguardando a final ser gerada...</p>;
+  }
+
+  const confrontos = [
+    { partida: partidaFinal, titulo: "Final" },
+    { partida: partidaTerceiro, titulo: "Disputa de 3º Lugar" },
+  ];
+
+  function nomeDoTime(timeId: number) {
+    return timesInscritos.find((t) => t.id === timeId);
+  }
+
+  return (
+    <div className="flex flex-col gap-4 items-center">
+      <h2 className="text-cor-h text-xl! font-bold">Final</h2>
+      <Link to="/estatisticas" className="text-cor-secondaria-p underline">
+        Ver estatísticas
+      </Link>
+      <div className="flex flex-col gap-3 w-full">
+        {confrontos.map(({ partida, titulo }) => {
+          const timeCasa = nomeDoTime(partida.timeCasaId);
+          const timeVisitante = nomeDoTime(partida.timeVisitanteId);
+          const empatado = estaEmpatado(partida);
+          return (
+            <div key={partida.id} className="flex flex-col gap-2">
+              <h3 className="text-cor-h font-bold">{titulo}</h3>
+              <div className="flex flex-col gap-2 ring-1 ring-border rounded-md p-2! text-cor-secondaria-p">
+                <div className="flex items-center justify-between gap-2">
+                  <span>{timeCasa?.nomeJogador}</span>
+                  <input
+                    type="number"
+                    value={placares[partida.id]?.placarCasa ?? ""}
+                    onChange={(e) =>
+                      handlePlacarChange(partida.id, "placarCasa", e.currentTarget.value)
+                    }
+                    className="ring-border ring-1 rounded-md w-12 text-center"
+                  />
+                  <span>x</span>
+                  <input
+                    type="number"
+                    value={placares[partida.id]?.placarVisitante ?? ""}
+                    onChange={(e) =>
+                      handlePlacarChange(
+                        partida.id,
+                        "placarVisitante",
+                        e.currentTarget.value,
+                      )
+                    }
+                    className="ring-border ring-1 rounded-md w-12 text-center"
+                  />
+                  <span>{timeVisitante?.nomeJogador}</span>
+                </div>
+                {empatado && (
+                  <div className="flex items-center justify-between gap-2 text-cor-h">
+                    <label className="flex items-center gap-1">
+                      <input
+                        type="checkbox"
+                        checked={penaltiVencedor[partida.id] === partida.timeCasaId}
+                        onChange={() =>
+                          setPenaltiVencedor((atual) => ({
+                            ...atual,
+                            [partida.id]: partida.timeCasaId,
+                          }))
+                        }
+                      />
+                      Venceu nos pênaltis
+                    </label>
+                    <label className="flex items-center gap-1">
+                      <input
+                        type="checkbox"
+                        checked={penaltiVencedor[partida.id] === partida.timeVisitanteId}
+                        onChange={() =>
+                          setPenaltiVencedor((atual) => ({
+                            ...atual,
+                            [partida.id]: partida.timeVisitanteId,
+                          }))
+                        }
+                      />
+                      Venceu nos pênaltis
+                    </label>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <input
+        type="password"
+        value={senha}
+        onChange={(e) => setSenha(e.currentTarget.value)}
+        placeholder="Senha do organizador"
+        className="ring-border ring-1 rounded-md font-semibold text-center p-2! text-xl"
+      />
+      <button
+        onClick={handleConfirmarResultados}
+        className="ring-2 ring-cor-primaria-p p-3! rounded-md cursor-pointer text-cor-secondaria-p text-xl"
+      >
+        Confirmar resultados
+      </button>
+    </div>
+  );
+}

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useLogin } from "../contexts/LoginContext";
-import { getPartidas, registrarResultados } from "../services/usePartidas";
+import { getPartidas, registrarResultados, gerarFinal } from "../services/usePartidas";
 import type { Partida, ResultadoPartida } from "../services/usePartidas";
 
 type PlacarInput = { placarCasa: string; placarVisitante: string };
@@ -12,6 +12,8 @@ export default function TelaSemis() {
   const [placares, setPlacares] = useState<Record<number, PlacarInput>>({});
   const [penaltiVencedor, setPenaltiVencedor] = useState<Record<number, number>>({});
   const [senha, setSenha] = useState<string>("");
+  const [senhaFinal, setSenhaFinal] = useState<string>("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function buscarPartidas() {
@@ -69,6 +71,15 @@ export default function TelaSemis() {
     }
   }
 
+  async function handleGerarFinal() {
+    try {
+      await gerarFinal(senhaFinal);
+      navigate("/final");
+    } catch (error) {
+      console.error("Erro ao gerar a final:", error);
+    }
+  }
+
   const semis = partidas.filter((p) => p.fase === "SEMIS");
 
   if (semis.length === 0) {
@@ -81,13 +92,25 @@ export default function TelaSemis() {
     return (
       <div className="flex flex-col gap-4 items-center">
         <p className="text-lg! font-bold">Semifinal completa! Todos os confrontos foram decididos.</p>
-        <p className="text-cor-secondaria-p">A final ainda não foi implementada.</p>
         <Link
           to="/estatisticas"
           className="ring-2 ring-cor-primaria-p p-3! rounded-md text-cor-secondaria-p text-xl"
         >
           Ver estatísticas
         </Link>
+        <input
+          type="password"
+          value={senhaFinal}
+          onChange={(e) => setSenhaFinal(e.currentTarget.value)}
+          placeholder="Senha do organizador"
+          className="ring-border ring-1 rounded-md font-semibold text-center p-2! text-xl"
+        />
+        <button
+          onClick={handleGerarFinal}
+          className="ring-2 ring-cor-primaria-p p-3! rounded-md cursor-pointer text-cor-secondaria-p text-xl"
+        >
+          Gerar final
+        </button>
       </div>
     );
   }

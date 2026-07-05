@@ -138,6 +138,20 @@ async function gerarSemis(senha: string) {
 }
 export { gerarSemis };
 
+async function gerarFinal(senha: string) {
+  const sendData = async () => {
+    const response = await fetch(
+      `${URL_BASE}/partidas/gerar-final?senha=${encodeURIComponent(senha)}`,
+      { method: "POST" },
+    );
+    if (!response.ok) {
+      throw new Error();
+    }
+  };
+  return await sendData();
+}
+export { gerarFinal };
+
 async function getEstatisticas() {
   const fetchData = async () => {
     const response = await fetch(`${URL_BASE}/partidas/estatisticas`, {

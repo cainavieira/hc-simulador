@@ -8,6 +8,8 @@ import TelaClassificacao from "./components/TelaClassificacao";
 import TelaOitavas from "./components/TelaOitavas";
 import TelaQuartas from "./components/TelaQuartas";
 import TelaSemis from "./components/TelaSemis";
+import TelaFinal from "./components/TelaFinal";
+import TelaResultadoFinal from "./components/TelaResultadoFinal";
 import TelaEstatisticas from "./components/TelaEstatisticas";
 import { LoginProvider } from "./contexts/LoginContext";
 import { NavegacaoProvider, useNavegacao } from "./contexts/NavegacaoContext";
@@ -48,6 +50,14 @@ function Conteudo() {
       <Route
         path="/semis"
         element={inscricaoEnviada ? <TelaSemis /> : <Navigate to="/" />}
+      />
+      <Route
+        path="/final"
+        element={inscricaoEnviada ? <TelaFinal /> : <Navigate to="/" />}
+      />
+      <Route
+        path="/resultado-final"
+        element={inscricaoEnviada ? <TelaResultadoFinal /> : <Navigate to="/" />}
       />
       <Route
         path="/estatisticas"
