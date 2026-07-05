@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { getClassificacao } from "../services/usePartidas";
 import type { LinhaClassificacao } from "../services/usePartidas";
 
@@ -30,6 +31,9 @@ export default function TelaClassificacao() {
   return (
     <section className="flex flex-col gap-4 w-full">
       <h2 className="text-cor-h text-xl! font-bold">Classificação</h2>
+      <Link to="/rodadas" className="text-cor-secondaria-p underline">
+        Voltar pra rodadas
+      </Link>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {letras.map((letra) => (
           <GrupoClassificacao
@@ -55,7 +59,7 @@ function GrupoClassificacao({
 }) {
   return (
     <div className="rounded-md overflow-hidden ring-1 ring-border">
-      <div className="bg-cor-primaria-p px-3 py-2 text-cor-h font-bold text-left p-2!">
+      <div className="bg-cor-primaria-p text-cor-h font-bold text-left p-2!">
         Grupo {letra}
       </div>
       <table className="w-full text-cor-secondaria-p text-sm!">
@@ -83,7 +87,7 @@ function GrupoClassificacao({
               }
             >
               <td className="p-1!">{i + 1}</td>
-              <td className="p-1! text-left flex items-center gap-1">
+              <td className="p-2! text-left flex items-center gap-1">
                 <img
                   src={`https://flagsapi.com/${linha.time.codigoPais}/flat/64.png`}
                   alt={linha.time.timeJogador}

@@ -58,7 +58,7 @@ export default function TelaRodadas() {
   }
 
   if (partidas.length === 0) {
-    return <p>Aguardando as rodadas serem geradas...</p>;
+    return <p className="text-lg! font-bold">Aguardando as rodadas serem geradas...</p>;
   }
 
   const partidasSemPlacar = partidas.filter((p) => p.placarCasa === null);
@@ -66,7 +66,7 @@ export default function TelaRodadas() {
   if (partidasSemPlacar.length === 0) {
     return (
       <div className="flex flex-col gap-4 items-center">
-        <p>Fase de grupos completa! Todas as partidas foram jogadas.</p>
+        <p className="text-lg! font-bold">Fase de grupos completa! Todas as partidas foram jogadas.</p>
         <Link
           to="/classificacao"
           className="ring-2 ring-cor-primaria-p p-3! rounded-md text-cor-secondaria-p text-xl"
@@ -138,7 +138,7 @@ export default function TelaRodadas() {
       />
       <button
         onClick={() => handleConfirmarResultados(partidasDaRodada)}
-        className="ring-2 ring-emerald-700 rounded-md cursor-pointer text-cor-secondaria-p text-xl"
+        className="ring-2 ring-emerald-700 rounded-md cursor-pointer text-cor-secondaria-p text-xl p-2! bg-amber-500 hover:bg-amber-600 hover:text-cor-h transition-colors"
       >
         Confirmar resultados
       </button>
