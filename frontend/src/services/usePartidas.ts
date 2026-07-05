@@ -138,12 +138,11 @@ async function gerarSemis(senha: string) {
 }
 export { gerarSemis };
 
-async function getEstatisticas(fase: string) {
+async function getEstatisticas() {
   const fetchData = async () => {
-    const response = await fetch(
-      `${URL_BASE}/partidas/estatisticas?fase=${encodeURIComponent(fase)}`,
-      { method: "GET" },
-    );
+    const response = await fetch(`${URL_BASE}/partidas/estatisticas`, {
+      method: "GET",
+    });
     if (!response.ok) {
       throw new Error();
     }

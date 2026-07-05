@@ -7,7 +7,9 @@ export default function Login() {
     useLogin();
 
   if (loading)
-    return <p className="flex-1 justify-center items-center">Carregando...</p>;
+    <div className="flex-1 justify-center items-center w100 h-screen flex">
+      return <p className="text-2xl text-amber-500 font-bold">Carregando...</p>;
+    </div>
 
   return (
     <form

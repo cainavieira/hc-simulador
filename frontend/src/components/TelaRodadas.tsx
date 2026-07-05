@@ -55,6 +55,7 @@ export default function TelaRodadas() {
       const dados = await getPartidas();
       setPartidas(dados);
       setPlacares({});
+      setSenha("");
     } catch (error) {
       console.error("Erro ao registrar os resultados da rodada:", error);
     }

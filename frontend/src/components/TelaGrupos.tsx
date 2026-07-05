@@ -77,8 +77,8 @@ export default function TelaGrupos() {
   }
 
   return (
-    <div className="flex flex-col gap-4 items-center">
-      <p>Aguardando o sorteio dos grupos...</p>
+    <div className="flex flex-col gap-8! items-center">
+      <p className="text-2xl!">Aguardando o sorteio dos grupos...</p>
       <input
         type="number"
         value={numeroDeGrupos}

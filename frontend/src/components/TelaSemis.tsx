@@ -63,6 +63,7 @@ export default function TelaSemis() {
       setPartidas(dados);
       setPlacares({});
       setPenaltiVencedor({});
+      setSenha("");
     } catch (error) {
       console.error("Erro ao registrar os resultados da semifinal:", error);
     }
@@ -82,7 +83,7 @@ export default function TelaSemis() {
         <p className="text-lg! font-bold">Semifinal completa! Todos os confrontos foram decididos.</p>
         <p className="text-cor-secondaria-p">A final ainda não foi implementada.</p>
         <Link
-          to="/estatisticas/semis"
+          to="/estatisticas"
           className="ring-2 ring-cor-primaria-p p-3! rounded-md text-cor-secondaria-p text-xl"
         >
           Ver estatísticas
@@ -98,7 +99,7 @@ export default function TelaSemis() {
   return (
     <div className="flex flex-col gap-4 items-center">
       <h2 className="text-cor-h text-xl! font-bold">Semifinal</h2>
-      <Link to="/estatisticas/semis" className="text-cor-secondaria-p underline">
+      <Link to="/estatisticas" className="text-cor-secondaria-p underline">
         Ver estatísticas
       </Link>
       <div className="flex flex-col gap-3 w-full">

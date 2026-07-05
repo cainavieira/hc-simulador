@@ -65,6 +65,7 @@ export default function TelaOitavas() {
       setPartidas(dados);
       setPlacares({});
       setPenaltiVencedor({});
+      setSenha("");
     } catch (error) {
       console.error("Erro ao registrar os resultados das oitavas:", error);
     }
@@ -92,7 +93,7 @@ export default function TelaOitavas() {
       <div className="flex flex-col gap-4 items-center">
         <p className="text-lg! font-bold">Oitavas completas! Todos os confrontos foram decididos.</p>
         <Link
-          to="/estatisticas/oitavas"
+          to="/estatisticas"
           className="ring-2 ring-cor-primaria-p p-3! rounded-md text-cor-secondaria-p text-xl"
         >
           Ver estatísticas
@@ -121,7 +122,7 @@ export default function TelaOitavas() {
   return (
     <div className="flex flex-col gap-4 items-center">
       <h2 className="text-cor-h text-xl! font-bold">Oitavas de Final</h2>
-      <Link to="/estatisticas/oitavas" className="text-cor-secondaria-p underline">
+      <Link to="/estatisticas" className="text-cor-secondaria-p underline">
         Ver estatísticas
       </Link>
       <div className="flex flex-col gap-3 w-full">

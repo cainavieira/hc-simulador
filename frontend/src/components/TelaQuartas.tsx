@@ -65,6 +65,7 @@ export default function TelaQuartas() {
       setPartidas(dados);
       setPlacares({});
       setPenaltiVencedor({});
+      setSenha("");
     } catch (error) {
       console.error("Erro ao registrar os resultados das quartas:", error);
     }
@@ -92,7 +93,7 @@ export default function TelaQuartas() {
       <div className="flex flex-col gap-4 items-center">
         <p className="text-lg! font-bold">Quartas completas! Todos os confrontos foram decididos.</p>
         <Link
-          to="/estatisticas/quartas"
+          to="/estatisticas"
           className="ring-2 ring-cor-primaria-p p-3! rounded-md text-cor-secondaria-p text-xl"
         >
           Ver estatísticas
@@ -121,7 +122,7 @@ export default function TelaQuartas() {
   return (
     <div className="flex flex-col gap-4 items-center">
       <h2 className="text-cor-h text-xl! font-bold">Quartas de Final</h2>
-      <Link to="/estatisticas/quartas" className="text-cor-secondaria-p underline">
+      <Link to="/estatisticas" className="text-cor-secondaria-p underline">
         Ver estatísticas
       </Link>
       <div className="flex flex-col gap-3 w-full">

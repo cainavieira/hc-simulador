@@ -50,7 +50,7 @@ function Conteudo() {
         element={inscricaoEnviada ? <TelaSemis /> : <Navigate to="/" />}
       />
       <Route
-        path="/estatisticas/:fase"
+        path="/estatisticas"
         element={inscricaoEnviada ? <TelaEstatisticas /> : <Navigate to="/" />}
       />
     </Routes>
